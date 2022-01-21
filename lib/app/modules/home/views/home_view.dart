@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:youqiflutter/app/model/date_list.dart';
 import 'package:youqiflutter/app/modules/home/views/content_card.dart';
+import 'package:youqiflutter/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
-const SCALE_FRACTION = 0.7;
-const FULL_SCALE = 1.0;
+const double SCALE_FRACTION = 0.7;
+const double FULL_SCALE = 1.0;
 
 /// 主页
 class HomeView extends GetView<HomeController> {
@@ -31,12 +33,23 @@ class HomeView extends GetView<HomeController> {
             child: Container(
                 margin: const EdgeInsets.only(top: 50),
                 alignment: Alignment.topCenter,
-                child: PageView.builder(
-                    itemCount: 7,
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return circleOffer(1.0, context);
-                    })),
+                child: Obx(() {
+                  if (controller.dateList.isNotEmpty) {
+                    return PageView.builder(
+                        itemCount: controller.dateList.length,
+                        physics: const BouncingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return circleOffer(
+                              1.0, context, controller.dateList[index]);
+                        });
+                  }
+
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4.0,
+                    ),
+                  );
+                })),
           ),
           // 底栏
           _bottomBar(context),
@@ -179,13 +192,17 @@ class DateLinePainter extends CustomPainter {
   }
 }
 
-Widget circleOffer(double scale, BuildContext context) {
-  final width = MediaQuery
-      .of(context)
-      .size
-      .width - 40;
+Widget circleOffer(double scale, BuildContext context, Data data) {
+  final width = MediaQuery.of(context).size.width - 40;
   return Container(
     alignment: Alignment.topCenter,
-    child: SizedBox(height: width, width: width, child: const ContentCard()),
+    child: SizedBox(
+        height: width,
+        width: width,
+        child: InkWell(
+            onTap: () {
+              Get.toNamed(Routes.DETAIL);
+            },
+            child: ContentCard(data: data))),
   );
 }

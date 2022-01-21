@@ -1,11 +1,14 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:youqiflutter/app/model/date_list.dart';
 
 typedef DioCallback<D> = dynamic Function(D data);
 
 class DioUtils {
   static DioUtils? _instance;
 
-  String url = "https://toivansdk.oss-cn-hangzhou.aliyuncs.com/";
+  String url = "https://youqi.taguxdesign.com/api/";
 
   late Dio dio;
 
@@ -19,6 +22,8 @@ class DioUtils {
 
   DioUtils.init() {
     options = BaseOptions(connectTimeout: 5000, maxRedirects: 10);
+    options.baseUrl = url;
+    options.responseType = ResponseType.plain;
     dio = Dio(options);
   }
 
@@ -27,12 +32,17 @@ class DioUtils {
     return _instance!;
   }
 
-  getHomePageInfo(DioCallback<dynamic> successCallBack,
+  getHomePageInfo(DioCallback<List<Data>?> successCallBack,
       DioCallback<DioError> failCallBack) async {
     Response? response;
 
     try {
-      response = await dio.get("");
+      response = await dio.get("datelist");
+
+      DateList dateList =
+          DateList.fromJson(json.decode(response.data.toString()));
+
+      successCallBack(dateList.data);
     } on DioError catch (e) {
       formatError(e);
       failCallBack(e);
